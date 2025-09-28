@@ -16,14 +16,23 @@
         https://venusdocs.fugerit.org/guide/#doc-format-entry-point
     -->
 
-    <#assign defaultTitle="My sample title XML">
+    <#--
+        this will convert json string to json
+        https://freemarker.apache.org/docs/ref_builtins_expert.html#ref_builtin_eval
+        https://freemarker.apache.org/docs/ref_builtins_expert.html#ref_builtin_eval_json
+    -->
+    <#assign jsonDataModel = jsonDataModel?eval_json>
+
+    <#assign docTitle=jsonDataModel.docTitle>
+
+    <#assign listPeople=jsonDataModel.listPeople>
 
     <metadata>
         <!-- Margin for document : left;right;top;bottom -->
         <info name="margins">10;10;10;30</info>
         <!-- documenta meta information -->
-        <info name="doc-title">${docTitle!defaultTitle}</info>
-        <info name="doc-subject">fj doc venus sample source FreeMarker Template XML - ftlx</info>
+        <info name="doc-title">${docTitle}</info>
+        <info name="doc-subject">Fugerit Venus Doc Mongo DB Data Source - Template XML - ftlx</info>
         <info name="doc-author">fugerit79</info>
         <info name="doc-language">en</info>
         <!-- property specific for xls/xlsx -->

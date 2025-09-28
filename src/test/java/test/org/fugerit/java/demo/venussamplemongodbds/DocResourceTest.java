@@ -1,10 +1,12 @@
 package test.org.fugerit.java.demo.venussamplemongodbds;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 
+@TestProfile(MongoContainerProfile.class)
 @QuarkusTest
 class DocResourceTest {
 

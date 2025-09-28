@@ -1,5 +1,90 @@
 # venus-sample-mongodb-ds
 
+This project shows how to use MongoDB as a data source for [Fugerit Venus Doc Framework](https://github.com/fugerit-org/fj-doc).
+
+## Key modifications
+
+1. Get a document from MongoDB, converted to JSON string
+
+```java
+@Inject
+DocHelper docHelper;
+
+@Inject
+private MongoClient mongoClient;
+
+private MongoDatabase getDatabase() {
+    return this.mongoClient.getDatabase( "venus-sample-mongodb-ds" );
+}
+
+private String venusPeopleDataModelById( String id ) {
+    MongoCollection<Document> collection = this.getDatabase().getCollection( "venusPeopleDataModel" );
+    FindIterable<Document> result = collection.find( Filters.eq( "id", id ) );
+    MongoCursor<Document> cursor = result.iterator();
+    if ( cursor.hasNext() ) {
+        return cursor.next().toJson();
+    } else {
+        return null;
+    }
+}
+
+byte[] processDocument(String handlerId) {
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+        String documentId = "people-sample-001";    // mongo db document id
+        String jsonDataModel = this.venusPeopleDataModelById( documentId );
+        log.info( "processDocument handlerId : {}", handlerId );
+        String chainId = "document";
+        // output generation
+        this.docHelper.getDocProcessConfig().fullProcess(chainId, DocProcessContext.newContext("jsonDataModel", jsonDataModel), handlerId, baos);
+        // return the output
+        return baos.toByteArray();
+    } catch (Exception e) {
+        String message = String.format("Error processing %s, error:%s", handlerId, e);
+        log.error(message, e);
+        throw new WebApplicationException(message, e);
+    }
+}
+```
+
+2. Convert the json data model to a FreeMarker data model : 
+
+```txt
+   <#--
+   this will convert json string to json
+   https://freemarker.apache.org/docs/ref_builtins_expert.html#ref_builtin_eval
+   https://freemarker.apache.org/docs/ref_builtins_expert.html#ref_builtin_eval_json
+   -->
+   <#assign jsonDataModel = jsonDataModel?eval_json>
+```
+
+### Start in dev mode
+
+1. Create mongo db instance with db initialization (script src/test/resources/mongo-db/mongo-init.js) :
+
+```shell
+docker run --rm -p 27017:27017 --name MONGO8 -v `pwd`/src/test/resources/mongo-db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js mongo:8.0
+```
+
+2. Start the application in dev mode
+
+The back end
+
+```shell
+mvn quarkus:dev
+```
+
+## Original project README
+
+Here starts the original project readme as created by command : 
+
+```shell
+mvn org.fugerit.java:fj-doc-maven-plugin:8.16.4:init \
+-DgroupId=org.fugerit.java.demo \
+-DartifactId=venus-sample-mongodb-ds \
+-Dextensions=base,freemarker,mod-fop \
+-Dflavour=quarkus-3
+```
+
 ## Quickstart
 
 Requirement :

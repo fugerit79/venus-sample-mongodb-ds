@@ -4,3 +4,5 @@ quarkus:
     additional-build-args: -H:IncludeResources=venus-sample-mongodb-ds/fm-doc-process-config.xml,\
       -H:IncludeResources=venus-sample-mongodb-ds/template/document.ftl
 
+  mongodb:
+    connection-string: ${MONGODB_URL:mongodb://localhost:27017/venus-sample-mongodb-ds}

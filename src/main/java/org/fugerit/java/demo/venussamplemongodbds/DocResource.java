@@ -1,24 +1,23 @@
 package org.fugerit.java.demo.venussamplemongodbds;
 
+import com.mongodb.client.*;
+import com.mongodb.client.model.Filters;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
 import org.fugerit.java.doc.base.config.DocConfig;
 import org.fugerit.java.doc.base.process.DocProcessContext;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
-import java.util.List;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.eclipse.microprofile.openapi.annotations.tags.Tags;
 
 @Slf4j
 @ApplicationScoped
@@ -27,18 +26,34 @@ public class DocResource {
 
     @Inject
     DocHelper docHelper;
+
+    @Inject
+    private MongoClient mongoClient;
+
+    private MongoDatabase getDatabase() {
+        return this.mongoClient.getDatabase( "venus-sample-mongodb-ds" );
+    }
+
+    private String venusPeopleDataModelById( String id ) {
+        MongoCollection<Document> collection = this.getDatabase().getCollection( "venusPeopleDataModel" );
+        FindIterable<Document> result = collection.find( Filters.eq( "id", id ) );
+        try ( MongoCursor<Document> cursor = result.iterator() ) {
+            if ( cursor.hasNext() ) {
+                return cursor.next().toJson();
+            } else {
+                return null;
+            }
+        }
+    }
+
     byte[] processDocument(String handlerId) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-
-            // create custom data for the fremarker template 'document.ftl'
-            List<People> listPeople = Arrays.asList(new People("Luthien", "Tinuviel", "Queen"), new People("Thorin", "Oakshield", "King"));
-            
-            
-            
+            String documentId = "people-sample-001";    // mongo db document id
+            String jsonDataModel = this.venusPeopleDataModelById( documentId );
             log.info( "processDocument handlerId : {}", handlerId );
             String chainId = "document";
             // output generation
-            this.docHelper.getDocProcessConfig().fullProcess(chainId, DocProcessContext.newContext("listPeople", listPeople), handlerId, baos);
+            this.docHelper.getDocProcessConfig().fullProcess(chainId, DocProcessContext.newContext("jsonDataModel", jsonDataModel), handlerId, baos);
             // return the output
             return baos.toByteArray();
         } catch (Exception e) {
