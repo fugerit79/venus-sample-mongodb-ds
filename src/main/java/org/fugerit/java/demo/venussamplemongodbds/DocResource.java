@@ -28,7 +28,7 @@ public class DocResource {
     DocHelper docHelper;
 
     @Inject
-    private MongoClient mongoClient;
+    MongoClient mongoClient;
 
     private MongoDatabase getDatabase() {
         return this.mongoClient.getDatabase( "venus-sample-mongodb-ds" );
