@@ -7,7 +7,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.fugerit.java.doc.base.config.DocConfig;
@@ -24,11 +23,14 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Path("/doc")
 public class DocResource {
 
-    @Inject
     DocHelper docHelper;
 
-    @Inject
     MongoClient mongoClient;
+
+    public DocResource( DocHelper docHelper, MongoClient mongoClient) {
+        this.docHelper = docHelper;
+        this.mongoClient = mongoClient;
+    }
 
     private MongoDatabase getDatabase() {
         return this.mongoClient.getDatabase( "venus-sample-mongodb-ds" );
